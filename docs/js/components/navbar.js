@@ -5,9 +5,54 @@ import {
   toggleLanguage
 } from "../i18n/i18n.js";
 
-// Navbar HTML үүсгэх
 export function mountNavbar(root) {
   if (!root) return;
+
+  const menus = [
+    {
+      path: "#/",
+      title: t("nav.home"),
+      icon: "fa-house",
+      color: "#ffb900"
+    },
+    {
+      path: "#/courses",
+      title: t("nav.courses"),
+      icon: "fa-book-open",
+      color: "#18b76a"
+    },
+    {
+      path: "#/schedule",
+      title: t("nav.schedule"),
+      icon: "fa-calendar-days",
+      color: "#4758ff"
+    },
+    {
+      path: "#/assignments",
+      title: t("nav.assignments"),
+      icon: "fa-clipboard-list",
+      color: "#55c8f4"
+    },
+    {
+      path: "#/grades",
+      title: t("nav.grades"),
+      icon: "fa-chart-column",
+      color: "#fa648a"
+    }
+  ];
+
+  const menuHTML = menus.map((menu) => `
+    <a class="navbar-item student-nav-link"
+       href="${menu.path}">
+
+      <span class="student-nav-icon"
+            style="color: ${menu.color}">
+        <i class="fas ${menu.icon}"></i>
+      </span>
+
+      <span>${menu.title}</span>
+    </a>
+  `).join("");
 
   root.innerHTML = `
     <nav class="navbar is-white student-navbar"
@@ -16,83 +61,50 @@ export function mountNavbar(root) {
 
       <div class="container">
 
-        <!-- Logo -->
         <div class="navbar-brand">
-
-          <a class="navbar-item student-brand" href="#/">
+          <a class="navbar-item student-brand"
+             href="#/">
             <span class="icon mr-2">
               <i class="fas fa-graduation-cap"></i>
             </span>
             StudentHub
           </a>
 
-          <!-- Mobile burger -->
           <a role="button"
              class="navbar-burger"
              aria-label="menu"
              aria-expanded="false"
              data-target="studentNavbarMenu">
-
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
           </a>
-
         </div>
 
-        <!-- Navbar menu -->
-        <div id="studentNavbarMenu" class="navbar-menu">
+        <div id="studentNavbarMenu"
+             class="navbar-menu">
 
           <div class="navbar-start">
-
-            <a class="navbar-item" href="#/">
-              ${t("nav.home")}
-            </a>
-
-            <a class="navbar-item" href="#/courses">
-              ${t("nav.courses")}
-            </a>
-
-            <a class="navbar-item" href="#/schedule">
-              ${t("nav.schedule")}
-            </a>
-
-            <a class="navbar-item" href="#/assignments">
-              ${t("nav.assignments")}
-            </a>
-
-            <a class="navbar-item" href="#/grades">
-              ${t("nav.grades")}
-            </a>
-
+            ${menuHTML}
           </div>
 
-          <!-- Language button -->
           <div class="navbar-end">
-
             <div class="navbar-item">
-              <button
-                id="languageToggle"
-                class="button is-primary is-light"
-                type="button"
-                aria-label="Change language">
-
+              <button id="languageToggle"
+                      class="button is-primary is-light"
+                      type="button">
                 <span class="icon">
                   <i class="fas fa-globe"></i>
                 </span>
-
                 <span>
                   ${getLanguage().toUpperCase()}
                 </span>
-
               </button>
             </div>
-
           </div>
 
         </div>
-
       </div>
     </nav>
   `;
@@ -101,14 +113,12 @@ export function mountNavbar(root) {
   updateActiveMenu(root);
 }
 
-// Navbar event-үүд
 function bindNavbarEvents(root) {
   const burger = root.querySelector(".navbar-burger");
   const menu = root.querySelector(".navbar-menu");
   const languageButton =
     root.querySelector("#languageToggle");
 
-  // Mobile menu
   if (burger && menu) {
     burger.addEventListener("click", () => {
       const isActive =
@@ -123,34 +133,25 @@ function bindNavbarEvents(root) {
     });
   }
 
-  // Language toggle
-  if (languageButton) {
-    languageButton.addEventListener("click", () => {
-      toggleLanguage();
-    });
-  }
+  languageButton?.addEventListener("click", () => {
+    toggleLanguage();
+  });
 
-  // Menu link дарахад mobile menu хаах
-  root.querySelectorAll(".navbar-start .navbar-item")
+  root.querySelectorAll(".student-nav-link")
     .forEach((link) => {
       link.addEventListener("click", () => {
         burger?.classList.remove("is-active");
         menu?.classList.remove("is-active");
 
-        burger?.setAttribute(
-          "aria-expanded",
-          "false"
-        );
+        burger?.setAttribute("aria-expanded", "false");
       });
     });
 }
 
-// Идэвхтэй хуудсыг тодруулах
 function updateActiveMenu(root) {
-  const currentPath =
-    window.location.hash || "#/";
+  const currentPath = window.location.hash || "#/";
 
-  root.querySelectorAll(".navbar-start .navbar-item")
+  root.querySelectorAll(".student-nav-link")
     .forEach((link) => {
       const isActive =
         link.getAttribute("href") === currentPath;
@@ -165,20 +166,12 @@ function updateActiveMenu(root) {
     });
 }
 
-// Хуудас солигдоход Navbar шинэчлэх
 window.addEventListener("hashchange", () => {
   const root = document.getElementById("navbar");
-
-  if (root) {
-    updateActiveMenu(root);
-  }
+  if (root) updateActiveMenu(root);
 });
 
-// Хэл солигдоход Navbar дахин зурах
 window.addEventListener("languageChanged", () => {
   const root = document.getElementById("navbar");
-
-  if (root) {
-    mountNavbar(root);
-  }
+  if (root) mountNavbar(root);
 });
