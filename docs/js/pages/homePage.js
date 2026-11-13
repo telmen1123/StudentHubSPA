@@ -2,7 +2,9 @@
 import { courses } from "../data/courses.js";
 import { assignments } from "../data/assignments.js";
 import { grades } from "../data/grades.js";
+
 import { calculateGPA } from "../utils/gradeUtils.js";
+import { t, getLanguage } from "../i18n/i18n.js";
 
 const STORAGE_KEY = "studenthub-assignments";
 
@@ -18,15 +20,30 @@ function getAssignments() {
       }
     }
   } catch (error) {
-    console.error(
-      "Даалгаврын мэдээлэл уншихад алдаа:",
-      error
-    );
+    console.error("Даалгавар уншихад алдаа:", error);
   }
 
   return assignments;
 }
 
+// Огноог сонгосон хэлээр харуулах
+function formatDate(dateString) {
+  const date = new Date(`${dateString}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
+
+  const locale = getLanguage() === "mn" ? "mn-MN" : "en-US";
+
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+}
+
+// Dashboard хуудас
 export function renderHomePage() {
   const items = getAssignments();
 
@@ -48,25 +65,25 @@ export function renderHomePage() {
     )
     .slice(0, 3);
 
+  // GPA тооцоолох
+  const gpa = calculateGPA(grades);
+
   // Даалгаврын хүснэгт
   const upcomingRows = upcoming.length
     ? upcoming.map((item) => `
         <tr>
           <td>${item.title}</td>
           <td>${item.course}</td>
-          <td>${item.deadline}</td>
+          <td>${formatDate(item.deadline)}</td>
         </tr>
       `).join("")
     : `
         <tr>
           <td colspan="3" class="has-text-centered">
-            Хүлээгдэж буй даалгавар байхгүй.
+            ${t("home.noAssignments")}
           </td>
         </tr>
       `;
-
-  // GPA тооцоолох
-  const gpa = calculateGPA(grades);
 
   return `
     <section class="section">
@@ -75,11 +92,11 @@ export function renderHomePage() {
         <!-- Dashboard гарчиг -->
         <div class="mb-5">
           <h1 class="title">
-            StudentHub Dashboard
+            ${t("home.title")}
           </h1>
 
           <p class="subtitle">
-            Оюутны хичээлийн мэдээллийн нэгдсэн самбар
+            ${t("home.subtitle")}
           </p>
         </div>
 
@@ -90,7 +107,7 @@ export function renderHomePage() {
           <div class="column is-3-desktop is-6-tablet">
             <div class="box dashboard-card">
               <p class="dashboard-label">
-                Нийт хичээл
+                ${t("home.totalCourses")}
               </p>
 
               <p class="dashboard-value">
@@ -98,7 +115,7 @@ export function renderHomePage() {
               </p>
 
               <a href="#/courses">
-                Хичээлүүд үзэх
+                ${t("home.viewCourses")}
               </a>
             </div>
           </div>
@@ -107,7 +124,7 @@ export function renderHomePage() {
           <div class="column is-3-desktop is-6-tablet">
             <div class="box dashboard-card">
               <p class="dashboard-label">
-                Нийт кредит
+                ${t("home.totalCredits")}
               </p>
 
               <p class="dashboard-value">
@@ -115,7 +132,7 @@ export function renderHomePage() {
               </p>
 
               <a href="#/courses">
-                Дэлгэрэнгүй
+                ${t("home.details")}
               </a>
             </div>
           </div>
@@ -124,7 +141,7 @@ export function renderHomePage() {
           <div class="column is-3-desktop is-6-tablet">
             <div class="box dashboard-card">
               <p class="dashboard-label">
-                Үлдсэн даалгавар
+                ${t("home.pendingAssignments")}
               </p>
 
               <p class="dashboard-value">
@@ -132,7 +149,7 @@ export function renderHomePage() {
               </p>
 
               <a href="#/assignments">
-                Даалгавар үзэх
+                ${t("home.viewAssignments")}
               </a>
             </div>
           </div>
@@ -141,7 +158,7 @@ export function renderHomePage() {
           <div class="column is-3-desktop is-6-tablet">
             <div class="box dashboard-card">
               <p class="dashboard-label">
-                Голч дүн (GPA)
+                ${t("home.gpa")}
               </p>
 
               <p class="dashboard-value">
@@ -149,7 +166,7 @@ export function renderHomePage() {
               </p>
 
               <a href="#/grades">
-                Дүн харах
+                ${t("home.viewGrades")}
               </a>
             </div>
           </div>
@@ -163,11 +180,11 @@ export function renderHomePage() {
                       is-align-items-center mb-4">
 
             <h2 class="title is-5 mb-0">
-              Ойрын даалгаврууд
+              ${t("home.upcoming")}
             </h2>
 
             <a href="#/assignments">
-              Бүгдийг үзэх
+              ${t("home.viewAll")}
             </a>
           </div>
 
@@ -176,9 +193,9 @@ export function renderHomePage() {
 
               <thead>
                 <tr>
-                  <th>Даалгавар</th>
-                  <th>Хичээл</th>
-                  <th>Дуусах хугацаа</th>
+                  <th>${t("assignments.assignment")}</th>
+                  <th>${t("common.course")}</th>
+                  <th>${t("common.deadline")}</th>
                 </tr>
               </thead>
 
@@ -190,33 +207,33 @@ export function renderHomePage() {
           </div>
         </div>
 
-        <!-- Түргэн холбоос -->
+        <!-- Түргэн холбоосууд -->
         <div class="box mt-5">
 
           <h2 class="title is-5">
-            Түргэн холбоосууд
+            ${t("home.quickLinks")}
           </h2>
 
           <div class="buttons">
 
             <a href="#/courses"
                class="button is-primary">
-              Хичээлүүд
+              ${t("nav.courses")}
             </a>
 
             <a href="#/schedule"
                class="button is-link is-light">
-              Хуваарь
+              ${t("nav.schedule")}
             </a>
 
             <a href="#/assignments"
                class="button is-info is-light">
-              Даалгавар
+              ${t("nav.assignments")}
             </a>
 
             <a href="#/grades"
                class="button is-success is-light">
-              Дүн
+              ${t("nav.grades")}
             </a>
 
           </div>
